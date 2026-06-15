@@ -109,12 +109,13 @@ func GetConversationByUserIDAndConversationID(userId, conversationId string) (*C
 func GetConversationByConversationID(conversationId string) (*Conversations, error) {
 
 	db := config.GetDB()
-	query := "SELECT id, type, name, created_by, created_at, updated_at from conversations where id=$1"
+	query := "SELECT id, type, name,conversation_members, created_by, created_at, updated_at from conversations where id=$1"
 	var conversation Conversations
 	if err := db.QueryRow(query, conversationId).Scan(
 		&conversation.ID,
 		&conversation.ConversationType,
 		&conversation.Name,
+		&conversation.ConversationMember,
 		&conversation.CreatedBy,
 		&conversation.CreatedAt,
 		&conversation.UpdatedAt,

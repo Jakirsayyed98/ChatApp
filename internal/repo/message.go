@@ -49,12 +49,14 @@ func MessageWebSoketConnection(userID string, c *gin.Context) (interface{}, erro
 			log.Println("Read Error:", err)
 			break
 		}
-		fmt.Println(result)
-		if result.ID.String() == userID {
-			continue
+		fmt.Println(userID)
+		conversationMembers := result.ConversationMember.String()
+		// skip sender
+		if result.ConversationMember.String() == userID {
+			conversationMembers = result.CreatedBy.String()
 		}
-		receiverConn, ok := Clients[result.ID.String()]
-		log.Println("Receiver ID:", result.ID.String())
+		receiverConn, ok := Clients[conversationMembers]
+		log.Println("Receiver ID:", conversationMembers)
 		log.Println("Sender ID:", userID)
 		if ok {
 
