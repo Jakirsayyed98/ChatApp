@@ -9,14 +9,14 @@ import (
 )
 
 func RegisterUser(request *request.RegisterUserRequest) error {
-	if request.Email == "" || request.Password == "" || request.Username == "" {
+	if request.Email == "" || request.Password == "" || request.Name == "" {
 		return fmt.Errorf("email, password and username are required")
 	}
 
 	md5Hash := fmt.Sprintf("%x", request.Password)
 
 	user := &model.User{
-		Username: request.Username,
+		Name:     request.Name,
 		Password: md5Hash,
 		Email:    request.Email,
 	}
@@ -55,7 +55,7 @@ func GetCurrentUserByID(userID string) (*response.CurrentUserResponse, error) {
 
 	userResponse := &response.CurrentUserResponse{
 		ID:       user.ID.String(),
-		Username: user.Username,
+		Username: user.Name,
 		Email:    user.Email,
 		Status:   user.Status,
 	}

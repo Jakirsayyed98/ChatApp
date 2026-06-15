@@ -8,7 +8,7 @@ import (
 
 type User struct {
 	ID       uuid.UUID `json:"id" db:"id"`
-	Username string    `json:"username" db:"username"`
+	Name     string    `json:"name" db:"name"`
 	Password string    `json:"password" db:"password"`
 	Email    string    `json:"email" db:"email"`
 	Status   string    `json:"status" db:"status"`
@@ -16,7 +16,7 @@ type User struct {
 
 func InsertUser(user *User) error {
 	db := config.GetDB()
-	if _, err := db.Exec("Insert into users (username,password_hash,email) values ($1, $2, $3)", user.Username, user.Password, user.Email); err != nil {
+	if _, err := db.Exec("Insert into users (name,password_hash,email) values ($1, $2, $3)", user.Name, user.Password, user.Email); err != nil {
 		return err
 	}
 	return nil
@@ -26,7 +26,7 @@ func GetUserByMail(email string) (*User, error) {
 	db := config.GetDB()
 	user := &User{}
 
-	err := db.QueryRow("SELECT id, username, password_hash, email, status FROM users WHERE email = $1", email).Scan(&user.ID, &user.Username, &user.Password, &user.Email, &user.Status)
+	err := db.QueryRow("SELECT id, name, password_hash, email, status FROM users WHERE email = $1", email).Scan(&user.ID, &user.Name, &user.Password, &user.Email, &user.Status)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func GetUserByMail(email string) (*User, error) {
 func GetUserByID(id string) (*User, error) {
 	db := config.GetDB()
 	user := &User{}
-	err := db.QueryRow("SELECT id, username, email, status FROM users WHERE id = $1", id).Scan(&user.ID, &user.Username, &user.Email, &user.Status)
+	err := db.QueryRow("SELECT id, name, email, status FROM users WHERE id = $1", id).Scan(&user.ID, &user.Name, &user.Email, &user.Status)
 	if err != nil {
 		return nil, err
 	}

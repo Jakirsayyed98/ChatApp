@@ -3,7 +3,7 @@ package request
 import "github.com/gin-gonic/gin"
 
 type RegisterUserRequest struct {
-	Username string `json:"username" binding:"required"`
+	Name     string `json:"name" binding:"required"`
 	Password string `json:"password" binding:"required"`
 	Email    string `json:"email" binding:"required,email"`
 }
