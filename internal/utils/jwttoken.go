@@ -10,7 +10,7 @@ import (
 
 const (
 	TokenIssuer   = "chatapp"
-	TokenDuration = 15 * time.Minute
+	TokenDuration = 15 * time.Hour
 )
 
 type Claims struct {

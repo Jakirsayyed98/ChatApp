@@ -3,10 +3,12 @@ package repo
 import (
 	"chatapp/internal/model"
 	"chatapp/internal/request"
+	"database/sql"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -30,6 +32,11 @@ func MessageWebSoketConnection(userID string, c *gin.Context) (interface{}, erro
 		delete(Clients, userID)
 		conn.Close()
 	}()
+	conn.SetReadDeadline(time.Now().Add(1 * time.Minute))
+	conn.SetPongHandler(func(appData string) error {
+		conn.SetReadDeadline(time.Now().Add(1 * time.Minute))
+		return nil
+	})
 
 	for {
 		_, message, err := conn.ReadMessage()
@@ -46,20 +53,28 @@ func MessageWebSoketConnection(userID string, c *gin.Context) (interface{}, erro
 
 		result, err := model.GetConversationByConversationID(request.ConversationId)
 		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				log.Println("Conversation not found:", request.ConversationId)
+
+				conn.WriteJSON(gin.H{
+					"type":  "error",
+					"error": "conversation not found",
+				})
+
+				continue
+			}
 			log.Println("Read Error:", err)
 			break
 		}
-		fmt.Println(userID)
+
 		conversationMembers := result.ConversationMember.String()
 		// skip sender
 		if result.ConversationMember.String() == userID {
 			conversationMembers = result.CreatedBy.String()
 		}
-		receiverConn, ok := Clients[conversationMembers]
-		log.Println("Receiver ID:", conversationMembers)
-		log.Println("Sender ID:", userID)
-		if ok {
 
+		receiverConn, ok := Clients[conversationMembers]
+		if ok {
 			err = receiverConn.WriteJSON(gin.H{
 				"type":     "new_message",
 				"senderId": userID,
@@ -70,11 +85,6 @@ func MessageWebSoketConnection(userID string, c *gin.Context) (interface{}, erro
 				log.Println("Write Error:", err)
 			}
 		}
-
-		conn.WriteJSON(gin.H{
-			"type":    "ack",
-			"message": "Delivered",
-		})
 	}
 	return nil, nil
 }
